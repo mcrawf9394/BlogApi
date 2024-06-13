@@ -49,7 +49,7 @@ exports.createUser = [
         if(!errors.isEmpty()) {
             res.json({error: errors.array()})
         } else {
-            let salt = await bcrypt.genSalt(10)
+            let salt = bcrypt.genSaltSync(10)
             let hashedPassword = bcrypt.hashSync(req.body.password, salt)
             let newUser = new User({
                 firstName: req.body.firstName,
@@ -64,20 +64,86 @@ exports.createUser = [
     })
 ]
 exports.loginUser = [
-    passport.authenticate('local', {failureRedirect: '/error'}),
-    function (req, res) {
-        
-    }
+    body('username')
+        .trim()
+        .isLength({min: 1})
+        .escape(),
+    body('password')
+        .trim()
+        .isLength({min: 1})
+        .escape(),
+    asyncHandler(async (req, res) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            res.json({errors: errors.array()})
+        } else {
+            const user = await User.findOne({userName: req.body.username}).exec()
+            if (!user) {
+                res.json({error: "This user does not exist"})
+            } else {
+                let isValid = bcrypt.compareSync(req.body.password, user.password)
+                if (!isValid) {
+                    res.json({error: "This password is incorrect"})
+                } else {
+                    let token = jwt.sign({id: user._id}, process.env.ACCESS_SECRET, {expiresIn: '1h'})
+                    res.json({token})
+                }
+            }
+        }
+    })
 ]
 exports.updateUser = [
+    body("username", "Must enter a username")
+        .trim()
+        .isLength({min: 1})
+        .escape(),
+    body("password", "Must enter a password")
+        .trim()
+        .isLength({min: 1})
+        .escape(),
+    body("firstName", "Must have a first name")
+        .trim()
+        .isLength({min: 1})
+        .escape(),
+    body("lastName", "Must have a last name")
+        .trim()
+        .isLength({min: 1})
+        .escape(),
     passport.authenticate('jwt', {session: false}),
     asyncHandler(async (req, res, next) => {
-
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            res.json({errors: errors.array()})
+        } else {
+            let token = req.headers.authorization.split(' ')[1]
+            let currentUser = jwt.decode(token)
+            if (currentUser.id != req.params.userId) {
+                 res.json({errors: "Can not edit a different user"})
+            }
+            let salt = bcrypt.genSaltSync(10)
+            let hashedPassword = bcrypt.hashSync(req.body.password, salt)
+            let newUser = new User({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName, 
+                userName: req.body.username,
+                password: hashedPassword,
+                isCreator: false,
+                _id: req.params.userId
+            }) 
+            await User.findOneAndUpdate({_id: req.params.userId}, newUser, {}).exec()
+            res.json({newUser})
+        }
     })
 ]
 exports.deleteUser = [
     passport.authenticate('jwt', {session: false}),
     asyncHandler(async (req, res, next) => {
-
+        let token = req.headers.authorization.split(' ')[1]
+        let currentUser = jwt.decode(token)
+        if (currentUser.id != req.params.userId) {
+             res.json({errors: "Can not edit a different user"})
+        }
+        await User.findByIdAndDelete(req.params.userId)
+        res.json({message: "success"})
     })
 ]

@@ -22,6 +22,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 require('dotenv').config()
+require('./config/passport')
+app.use(passport.initialize())
 app.use('/api', indexRouter);
 
 // catch 404 and forward to error handler
