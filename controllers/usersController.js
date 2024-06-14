@@ -75,7 +75,7 @@ exports.loginUser = [
     asyncHandler(async (req, res) => {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
-            res.json({errors: errors.array()})
+            res.json({error: errors.array()})
         } else {
             const user = await User.findOne({userName: req.body.username}).exec()
             if (!user) {
@@ -113,12 +113,12 @@ exports.updateUser = [
     asyncHandler(async (req, res, next) => {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
-            res.json({errors: errors.array()})
+            res.json({error: errors.array()})
         } else {
             let token = req.headers.authorization.split(' ')[1]
             let currentUser = jwt.decode(token)
             if (currentUser.id != req.params.userId) {
-                 res.json({errors: "Can not edit a different user"})
+                 res.json({error: "Can not edit a different user"})
             }
             let salt = bcrypt.genSaltSync(10)
             let hashedPassword = bcrypt.hashSync(req.body.password, salt)
@@ -141,7 +141,7 @@ exports.deleteUser = [
         let token = req.headers.authorization.split(' ')[1]
         let currentUser = jwt.decode(token)
         if (currentUser.id != req.params.userId) {
-             res.json({errors: "Can not edit a different user"})
+             res.json({error: "Can not edit a different user"})
         }
         await User.findByIdAndDelete(req.params.userId)
         res.json({message: "success"})

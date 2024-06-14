@@ -24,6 +24,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 require('dotenv').config()
 require('./config/passport')
 app.use(passport.initialize())
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.header(   
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  )
+  next()
+})
 app.use('/api', indexRouter);
 
 // catch 404 and forward to error handler
