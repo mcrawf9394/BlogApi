@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const usersController = require('../controllers/usersController')
+const postsController = require('../controllers/postsController')
 router.get('/', function(req, res, next) {
   res.json({
     test: "Hello"
@@ -14,7 +15,11 @@ router.get('/users/:userId', usersController.getSingleUser)
 router.put('/users/:userId', usersController.updateUser)
 router.delete('/users/:userId', usersController.deleteUser)
 // Routes for Posts
-
+router.get('/posts', postsController.getAllPosts)
+router.post('/posts', postsController.createPost)
+router.get('/posts/:postId', postsController.getSinglePost)
+router.put('/posts/:postId', postsController.updatePost)
+router.delete('/posts/:postId', postsController.deletePost)
 // Routes for Comments
 
 // Routes that end in error
