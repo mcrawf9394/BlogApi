@@ -86,28 +86,23 @@ exports.loginUser = [
                     res.json({error: "This password is incorrect"})
                 } else {
                     let token = jwt.sign({id: user._id}, process.env.ACCESS_SECRET, {expiresIn: '1h'})
-                    res.json({token})
+                    res.json({token, id: user._id})
                 }
             }
         }
     })
 ]
 exports.updateUser = [
-    body("username", "Must enter a username")
-        .trim()
-        .isLength({min: 1})
-        .escape(),
     body("password", "Must enter a password")
         .trim()
         .isLength({min: 1})
         .escape(),
-    body("firstName", "Must have a first name")
+    body("confirm", "Must Confirm New Password")
         .trim()
         .isLength({min: 1})
-        .escape(),
-    body("lastName", "Must have a last name")
-        .trim()
-        .isLength({min: 1})
+        .custom((value, {req}) => {
+            return value === req.body.password
+        })
         .escape(),
     passport.authenticate('jwt', {session: false}),
     asyncHandler(async (req, res, next) => {
@@ -122,16 +117,9 @@ exports.updateUser = [
             }
             let salt = bcrypt.genSaltSync(10)
             let hashedPassword = bcrypt.hashSync(req.body.password, salt)
-            let newUser = new User({
-                firstName: req.body.firstName,
-                lastName: req.body.lastName, 
-                userName: req.body.username,
-                password: hashedPassword,
-                isCreator: false,
-                _id: req.params.userId
-            }) 
-            await User.findOneAndUpdate({_id: req.params.userId}, newUser, {}).exec()
-            res.json({newUser})
+            await User.findOneAndUpdate({_id: req.params.userId}, {password: hashedPassword}, {}).exec()
+            let newToken = jwt.sign({id: req.params.userId}, process.env.ACCESS_SECRET, {expiresIn: '1h'})
+            res.json({newToken})
         }
     })
 ]
