@@ -10,13 +10,13 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
     if (Users.length > 0) {
         res.json(Users)
     } else {
-        res.json({error: "There are no users"})
+        res.json({error: {"msg": "There are no users"}})
     }
 })
 exports.getSingleUser = asyncHandler(async (req, res, next) => {
     const singleUser = await User.findById(req.params.userId).exec()
     if (!singleUser) {
-        res.json({error: "This user does not exist"})
+        res.json({error: {"msg": "This user does not exist"}})
     } else {
         res.json(singleUser)
     }
@@ -79,13 +79,13 @@ exports.loginUser = [
         } else {
             const user = await User.findOne({userName: req.body.username}).exec()
             if (!user) {
-                res.json({error: "This user does not exist"})
+                res.json({error: {"msg": "This user does not exist"}})
             } else {
                 let isValid = bcrypt.compareSync(req.body.password, user.password)
                 if (!isValid) {
-                    res.json({error: "This password is incorrect"})
+                    res.json({error: {"msg": "This password is incorrect"}})
                 } else {
-                    let token = jwt.sign({id: user._id}, process.env.ACCESS_SECRET, {expiresIn: '1h'})
+                    let token = jwt.sign({id: user._id}, process.env.ACCESS_SECRET, {expiresIn: "7d"})
                     res.json({token, id: user._id})
                 }
             }
@@ -113,12 +113,12 @@ exports.updateUser = [
             let token = req.headers.authorization.split(' ')[1]
             let currentUser = jwt.decode(token)
             if (currentUser.id != req.params.userId) {
-                 res.json({error: "Can not edit a different user"})
+                 res.json({error: {"msg": "Can not edit a different user"}})
             }
             let salt = bcrypt.genSaltSync(10)
             let hashedPassword = bcrypt.hashSync(req.body.password, salt)
             await User.findOneAndUpdate({_id: req.params.userId}, {password: hashedPassword}, {}).exec()
-            let newToken = jwt.sign({id: req.params.userId}, process.env.ACCESS_SECRET, {expiresIn: '1h'})
+            let newToken = jwt.sign({id: req.params.userId}, process.env.ACCESS_SECRET, {expiresIn: '2d'})
             res.json({newToken})
         }
     })
@@ -129,7 +129,7 @@ exports.deleteUser = [
         let token = req.headers.authorization.split(' ')[1]
         let currentUser = jwt.decode(token)
         if (currentUser.id != req.params.userId) {
-             res.json({error: "Can not edit a different user"})
+             res.json({error: {"msg": "Can not edit a different user"}})
         }
         await User.findByIdAndDelete(req.params.userId)
         res.json({message: "success"})

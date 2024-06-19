@@ -32,7 +32,7 @@ exports.createPost = [
             const user = jwt.decode(token)
             const dbUser = await User.findById(user.id).exec()
             if (dbUser.isCreator === false) {
-                res.json({error: ["Only the creator of this project can add posts"]})
+                res.json({error: [{"msg": "Only the creator of this project can add posts"}]})
             } else {
                 const newPost = new Post({
                     author: user.id,
@@ -79,7 +79,7 @@ exports.updatePost = [
             const user = jwt.decode(token)
             const dbUser = await User.findById(user.id).exec()
             if (dbUser.isCreator === false) {
-                    res.json({error: ["Only the creator of this project can add posts"]})
+                    res.json({error: [{"msg": "Only the creator of this project can add posts"}]})
             } else {
                 await Post.findOneAndUpdate({_id: req.params.postId}, {title: req.body.title, postContent: req.body.postContent}, {})
                 res.json({success: "Post update successful"})
@@ -94,7 +94,7 @@ exports.deletePost = [
         const user = jwt.decode(token)
         const dbUser = await User.findById(user.id).exec()
         if (dbUser.isCreator === false) {
-            res.json({error: ["Only the creator of this project can add posts"]})
+            res.json({error: [{"msg": "Only the creator of this project can add posts"}]})
         } else {
             const currentPost = await Post.findById(req.params.postId)
             if (currentPost.comments.length != 0) {
