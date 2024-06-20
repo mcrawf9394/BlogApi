@@ -50,12 +50,8 @@ exports.createPost = [
 exports.getSinglePost = asyncHandler(async (req, res, next) => {
     try {
         const post = await Post.findById(req.params.postId).exec()
-        if (post.comments.length === 0) {
-            res.json({post: post, comments: ["There are no comments"]})
-        } else {
-            const comments = await Comment.find({post: post._id}).sort({date: 1}).exec()
-            res.json({post: post, comments: comments})
-        }
+        const comments = await Comment.find({post: req.params.postId}).sort({date: 1}).exec()
+        res.json({post: post, comments: comments})
     } catch (err) {
         res.json({error: err})
     }

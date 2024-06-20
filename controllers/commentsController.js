@@ -44,7 +44,7 @@ exports.createComment = [
                     date: req.body.date
                 })
                 await newComment.save()
-                res.json({success: "Comment created successfully"})
+                res.json({success: newComment})
             } catch (err) {
                 res.json({error: err})
             }
