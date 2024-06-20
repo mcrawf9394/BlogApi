@@ -86,7 +86,7 @@ exports.loginUser = [
                     res.json({error: {"msg": "This password is incorrect"}})
                 } else {
                     let token = jwt.sign({id: user._id}, process.env.ACCESS_SECRET, {expiresIn: "7d"})
-                    res.json({token, id: user._id})
+                    res.json({token, id: user._id, name: user.userName})
                 }
             }
         }
