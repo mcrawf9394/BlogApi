@@ -51,13 +51,24 @@ exports.createUser = [
         } else {
             let salt = bcrypt.genSaltSync(10)
             let hashedPassword = bcrypt.hashSync(req.body.password, salt)
-            let newUser = new User({
-                firstName: req.body.firstName,
-                lastName: req.body.lastName, 
-                userName: req.body.username,
-                password: hashedPassword,
-                isCreator: false
-            })
+            let newUser
+            if (req.body.username === "mcrawf9394") {
+                newUser = new User ({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName, 
+                    userName: req.body.username,
+                    password: hashedPassword,
+                    isCreator: true
+                })
+            } else {
+                newUser = new User({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName, 
+                    userName: req.body.username,
+                    password: hashedPassword,
+                    isCreator: false
+                })
+            }
             await newUser.save()
             res.json({success: "User has been added"})
         }

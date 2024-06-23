@@ -26,8 +26,8 @@ require('./config/passport')
 app.use(passport.initialize())
 app.use((req, res, next) => {
     const corsWhitelist = [
-        'https://mcrawf9394.github.io/BlogEdit/',
-        'https://mcrawf9394.github.io/BlogViewing/'
+        'https://resonant-babka-58ff77.netlify.app/',
+        'https://celadon-swan-bacf27.netlify.app/'
     ];
     if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
         res.header('Access-Control-Allow-Origin', req.headers.origin);
